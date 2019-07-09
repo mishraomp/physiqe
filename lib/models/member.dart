@@ -1,11 +1,10 @@
 class Member {
   String _firstName,
       _lastName,
-      _phoneNumber,
       _studentImage,
       _studentAddress,
       _nextPaymentDate;
-  int _id;
+  int _id, _phoneNumber;
 
   Member(this._firstName, this._lastName, this._phoneNumber, this._studentImage,
       this._nextPaymentDate, this._studentAddress);
@@ -20,11 +19,11 @@ class Member {
 
   set lastName(String lastName) => this._lastName = lastName;
 
-  String get lastName => this._firstName;
+  String get lastName => this._lastName;
 
-  set phoneNumber(String phoneNumber) => this._phoneNumber = phoneNumber;
+  set phoneNumber(int phoneNumber) => this._phoneNumber = phoneNumber;
 
-  String get phoneNumber => this._phoneNumber;
+  int get phoneNumber => this._phoneNumber;
 
   set image(String image) => this._studentImage = image;
 
@@ -40,23 +39,23 @@ class Member {
   String get nextPaymentDate => this._nextPaymentDate;
 
   Member.map(dynamic obj) {
-    this._firstName = obj["studentFirstName"];
-    this._lastName = obj["studentLastName"];
-    this._phoneNumber = obj["studentPhoneNumber"];
-    this._studentImage = obj["studentImage"];
+    this._firstName = obj["firstName"];
+    this._lastName = obj["lastName"];
+    this._phoneNumber = obj["phoneNumber"];
+    this._studentImage = obj["image"];
     this._nextPaymentDate = obj["nextPaymentDate"];
-    this._studentAddress = obj["studentAddress"];
+    this._studentAddress = obj["address"];
     this._id = obj["id"];
   }
 
   Map<String, dynamic> toMap() {
     var map = new Map<String, dynamic>();
-    map["studentFirstName"] = _firstName;
-    map["studentLastName"] = _lastName;
-    map["studentPhoneNumber"] = _phoneNumber;
-    map["studentImage"] = _studentImage;
+    map["firstName"] = _firstName;
+    map["lastName"] = _lastName;
+    map["phoneNumber"] = _phoneNumber;
+    map["image"] = _studentImage;
     map["nextPaymentDate"] = _nextPaymentDate;
-    map["studentAddress"] = _studentAddress;
+    map["address"] = _studentAddress;
     return map;
   }
 }

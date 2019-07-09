@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:physique_gym/screens/student/add_member.dart';
-import 'package:physique_gym/screens/student/search_member.dart';
+import 'package:physique_gym/screens/member/add_member.dart';
+import 'package:physique_gym/screens/member/search_member.dart';
 
 enum UserAction { SEARCH, ADD }
 
@@ -14,7 +14,6 @@ class HomeScreen extends StatefulWidget {
 class HomePageState extends State<HomeScreen> {
   bool isSearchPageEnabled = false;
   bool isAddPageEnabled = false;
-
   void setUserAction(UserAction action) {
     setState(() {
       if (action == UserAction.ADD) {
@@ -34,7 +33,8 @@ class HomePageState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
-          title: new Text("Home"),
+            title: new Text(
+                "Home") /*,
           actions: <Widget>[
             FlatButton(
               textColor: Colors.white,
@@ -45,18 +45,18 @@ class HomePageState extends State<HomeScreen> {
                   Text("Logout", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               shape: CircleBorder(side: BorderSide(color: Colors.transparent)),
             ),
-          ],
-        ),
+          ],*/
+            ),
         drawer: new Drawer(
             child: Container(
                 color: Colors.blue,
                 child: ListView(
-                  padding: EdgeInsets.all(10.0),
+                  padding: EdgeInsets.all(10),
                   shrinkWrap: true,
                   children: <Widget>[
                     new DrawerHeader(
                       child: new Text(
-                        'Student Menu',
+                        'Member Menu',
                         style: TextStyle(
                             color: Colors.white, fontStyle: FontStyle.italic),
                       ),
@@ -68,8 +68,13 @@ class HomePageState extends State<HomeScreen> {
                             color: Colors.white, fontStyle: FontStyle.italic),
                       ),
                       onTap: () {
-                        setUserAction(UserAction.SEARCH);
+                       // setUserAction(UserAction.SEARCH);
                         Navigator.of(context).pop();
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SearchMember(),
+                            ));
                       },
                     ),
                     new ListTile(
@@ -79,22 +84,32 @@ class HomePageState extends State<HomeScreen> {
                             color: Colors.white, fontStyle: FontStyle.italic),
                       ),
                       onTap: () {
-                        setUserAction(UserAction.ADD);
-                        print('dd New Student');
+                       // setUserAction(UserAction.ADD);
                         Navigator.of(context).pop();
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AddMember(),
+                            ));
                       },
                     )
                   ],
                 ))),
         body: new Container(
-          decoration: new BoxDecoration(
+          /*decoration: new BoxDecoration(
             image: new DecorationImage(
                 image: new AssetImage("assets/images/background_image.jpg"),
                 fit: BoxFit.cover),
-          ),
+          ),*/
           child: isAddPageEnabled || isSearchPageEnabled
-              ? isAddPageEnabled ? new AddStudent() : new SearchStudent()
-              : new Container(),
+              ? isAddPageEnabled ? new AddMember() : new SearchMember()
+              : new Container(
+                  child: new Text(
+                  "Welcome to Physique Gym",
+                  style: new TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.blue, ),
+
+                )),
         ));
   }
 }

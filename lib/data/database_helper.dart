@@ -8,14 +8,24 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:physique_gym/models/member.dart';
 import 'package:physique_gym/models/member_payment_history.dart';
+import 'package:physique_gym/constants/application_constants.dart';
 
 class DatabaseHelper {
-  final String createTableUser =
-      "CREATE TABLE user(id INTEGER PRIMARY KEY, userName TEXT, password TEXT, firstName TEXT,lastName TEXT, phoneNumber INTEGER)";
-  final String createTableStudent =
-      "CREATE TABLE student(id INTEGER PRIMARY KEY, studentFirstName TEXT, studentLastName TEXT, studentPhoneNumber TEXT, studentImage TEXT, studentAddress TEXT, nextPaymentDate Text)";
-  final String createTableStudentPaymentInfo =
-      "CREATE TABLE student_payment_info(id INTEGER PRIMARY KEY, studentId INTEGER NOT NULL, paymentDate TEXT, paymentAmount TEXT, FOREIGN KEY (studentId) REFERENCES student (id) )";
+  final String createTableUser = ApplicationConstants.CREATE_TABLE +
+      " " +
+      ApplicationConstants.TABLE_USER +
+      " (id INTEGER PRIMARY KEY, userName TEXT, password TEXT, firstName TEXT,lastName TEXT, phoneNumber INTEGER)";
+  final String createTableMember = ApplicationConstants.CREATE_TABLE +
+      " " +
+      ApplicationConstants.TABLE_MEMBER +
+      " (id INTEGER PRIMARY KEY, firstName TEXT, lastName TEXT, phoneNumber INTEGER, image TEXT, address TEXT, nextPaymentDate Date )";
+  final String createTableMemberPaymentInfo = ApplicationConstants
+          .CREATE_TABLE +
+      " " +
+      ApplicationConstants.TABLE_MEMBER_PAYMENT_INFO +
+      " (id INTEGER PRIMARY KEY, memberId INTEGER NOT NULL, paymentDate TEXT, paymentAmount TEXT, FOREIGN KEY (memberId) REFERENCES " +
+      ApplicationConstants.TABLE_MEMBER +
+      " (id) )";
   static final DatabaseHelper _instance = new DatabaseHelper.internal();
 
   factory DatabaseHelper() => _instance;
@@ -33,7 +43,7 @@ class DatabaseHelper {
   initDb() async {
     io.Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, "physique_gym.db");
-    //await deleteDatabase(path);
+    await deleteDatabase(path);
     var theDb = await openDatabase(path, version: 1, onCreate: _onCreate);
     return theDb;
   }
@@ -42,8 +52,8 @@ class DatabaseHelper {
     // When creating the db, create the table
     try {
       await db.execute(createTableUser);
-      await db.execute(createTableStudent);
-      await db.execute(createTableStudentPaymentInfo);
+      await db.execute(createTableMember);
+      await db.execute(createTableMemberPaymentInfo);
     } catch (error) {
       print('Error occurred' + error);
     }
@@ -60,10 +70,14 @@ class DatabaseHelper {
     return 0;
   }
 
-  Future<int> deleteUsers() async {
+  Future<int> deleteMemberDetails() async {
     var dbClient = await db;
-    int res = await dbClient.delete("User");
-    return res;
+    await dbClient.transaction((txn) async {
+      await txn.delete(ApplicationConstants.TABLE_MEMBER_PAYMENT_INFO);
+      await txn.delete(ApplicationConstants.TABLE_MEMBER);
+    });
+
+    return 1;
   }
 
   Future<bool> isLoggedIn() async {
@@ -91,9 +105,11 @@ class DatabaseHelper {
     try {
       var dbClient = await db;
       await dbClient.transaction((txn) async {
-        var result = await txn.insert('student', member.toMap());
+        var result =
+            await txn.insert(ApplicationConstants.TABLE_MEMBER, member.toMap());
         paymentHistory.memberId = result;
-        await txn.insert('student_payment_info', paymentHistory.toMap());
+        await txn.insert(ApplicationConstants.TABLE_MEMBER_PAYMENT_INFO,
+            paymentHistory.toMap());
       });
       return true;
     } catch (error) {
@@ -101,46 +117,89 @@ class DatabaseHelper {
     }
   }
 
-  Future<List<MemberDetails>> retrieveMembers() async {
+  Future<List<MemberDetails>> retrieveMembers(
+      Map<String, String> queryMap) async {
     try {
       var dbClient = await db;
       List<MemberDetails> members = new List();
-
-      List<Map<String, dynamic>> results =
-      await dbClient.rawQuery("SELECT * FROM student");
+      String sql = buildSql(
+          "SELECT * FROM " + ApplicationConstants.TABLE_MEMBER, queryMap);
+      List<Map<String, dynamic>> results = await dbClient.rawQuery(sql);
       for (Map item in results) {
         List<MemberPaymentHistory> memberPaymentHistoryList = new List();
         Member member = Member.map(item);
-        List<Map<String, dynamic>> memberPaymentDetails = await dbClient
-            .rawQuery("SELECT * FROM student_payment_info where studentId=" +
-            member.id.toString() +
-            "");
+        List<Map<String, dynamic>> memberPaymentDetails =
+            await dbClient.rawQuery("SELECT * FROM " +
+                ApplicationConstants.TABLE_MEMBER_PAYMENT_INFO +
+                " where memberId=" +
+                member.id.toString());
         for (Map memberPaymentDetails in memberPaymentDetails) {
           MemberPaymentHistory paymentHistory =
-          MemberPaymentHistory.map(memberPaymentDetails);
+              MemberPaymentHistory.map(memberPaymentDetails);
           memberPaymentHistoryList.add(paymentHistory);
         }
         MemberDetails memberDetails =
-        new MemberDetails(member, memberPaymentHistoryList);
+            new MemberDetails(member, memberPaymentHistoryList);
         members.add(memberDetails);
       }
-      print(members);
       return members;
     } catch (error) {
+      print(error);
       return [];
     }
   }
 
-  Future<bool> memberExist(String phoneNumber) async {
+  Future<int> addPaymentDetails(
+      int memberId, DateTime paymentDate, int paymentAmount) async {
     try {
       var dbClient = await db;
-      List<Map<String, dynamic>> results =
-      await dbClient.rawQuery("SELECT * FROM student where studentPhoneNumber="+phoneNumber);
-
-      print(results);
-      return results.length > 0;
+      final MemberPaymentHistory paymentHistory = new MemberPaymentHistory(
+          paymentDate.toString(), paymentAmount.toString());
+      paymentHistory.memberId = memberId;
+      await dbClient.transaction((txn) async {
+        await txn.insert(ApplicationConstants.TABLE_MEMBER_PAYMENT_INFO,
+            paymentHistory.toMap());
+      });
+      return 1;
     } catch (error) {
-      return false;
+      print(error);
+      return 0;
+    }
+  }
+
+  Future<List<Member>> findMemberByPhoneNumber(int phoneNumber) async {
+    try {
+      List<Member> members = new List();
+      var dbClient = await db;
+      List<Map<String, dynamic>> results = await dbClient.rawQuery(
+          "SELECT * FROM " +
+              ApplicationConstants.TABLE_MEMBER +
+              " where phoneNumber=" +
+              phoneNumber.toString());
+      for (var member in results) {
+        members.add(Member.map(member));
+      }
+      return members;
+    } catch (error) {
+      print(error);
+      return [];
+    }
+  }
+
+  String buildSql(String sql, Map<String, String> queryMap) {
+    if (queryMap == null) {
+      return sql;
+    } else {
+      String whereClause = "";
+      int index = 0;
+      queryMap.forEach((key, value) => {
+            if (index == 0)
+              {whereClause = whereClause + " WHERE " + key + " = " + value}
+            else
+              {whereClause = whereClause + " AND " + key + " = " + value},
+            index++
+          });
+      return sql + whereClause;
     }
   }
 }

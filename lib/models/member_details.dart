@@ -38,7 +38,7 @@ class MemberDetails {
         " , " +
         " , " +
         "Phoner Number : " +
-        _member.phoneNumber +
+        _member.phoneNumber.toString() +
         "Address : " +
         _member.address +
         " , " +

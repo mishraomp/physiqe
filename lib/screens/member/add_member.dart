@@ -9,22 +9,22 @@ import 'package:physique_gym/data/database_helper.dart';
 import 'package:physique_gym/models/member.dart';
 import 'package:physique_gym/models/member_payment_history.dart';
 
-class AddStudent extends StatefulWidget {
+class AddMember extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return AddStudentState();
+    return AddMemberState();
   }
 }
 
-class AddStudentState extends State<AddStudent> {
+class AddMemberState extends State<AddMember> {
   String _firstName,
       _lastName,
-      _phoneNumber,
       _studentImage,
       _studentAddress,
       _paymentAmount,
       _paymentDate,
       _nextPaymentDate;
+  int _phoneNumber;
   File _memberImage;
   BuildContext _ctx;
   var picture;
@@ -46,9 +46,9 @@ class AddStudentState extends State<AddStudent> {
     if (form.validate()) {
       setState(() => _isLoading = true);
       form.save();
-      bool memberExist =
-          await new DatabaseHelper().memberExist(this._phoneNumber);
-      if (!memberExist) {
+      var members =
+          await new DatabaseHelper().findMemberByPhoneNumber(this._phoneNumber);
+      if (members.length == 0) {
         List<int> image =
             _memberImage != null ? await _memberImage.readAsBytes() : [];
         if (image.isNotEmpty) {
@@ -73,7 +73,6 @@ class AddStudentState extends State<AddStudent> {
             formKey.currentState.reset();
           });
           _showSnackBar("Member added successfully.", Colors.white);
-
         } else {
           _showSnackBar("Member could not be added.", Colors.red);
           setState(() => _isLoading = false);
@@ -88,7 +87,7 @@ class AddStudentState extends State<AddStudent> {
   }
 
   void _showSnackBar(String text, Color color) {
-    Scaffold.of(_ctx).showSnackBar(SnackBar(
+    scaffoldKey.currentState.showSnackBar(SnackBar(
       content: Text(
         text,
         style: TextStyle(color: color),
@@ -122,7 +121,7 @@ class AddStudentState extends State<AddStudent> {
     DateTime date;
     final formats = {
       InputType.both: DateFormat("EEEE, MMMM d, yyyy 'at' h:mma"),
-      InputType.date: DateFormat('dd-MM-yyyy'),
+      InputType.date: new DateFormat.yMMMMd("en_US"),
       InputType.time: DateFormat("HH:mm"),
     };
     InputType inputType = InputType.date;
@@ -133,9 +132,7 @@ class AddStudentState extends State<AddStudent> {
       editable: false,
       onSaved: (val) => _paymentDate = val.toString(),
       validator: (val) {
-        return val == null
-            ? "Payment Date can not be blank."
-            : null;
+        return val == null ? "Payment Date can not be blank." : null;
       },
       decoration: InputDecoration(
           labelText: 'Payment Date', hasFloatingPlaceholder: false),
@@ -148,9 +145,7 @@ class AddStudentState extends State<AddStudent> {
       editable: false,
       onSaved: (val) => _nextPaymentDate = val.toString(),
       validator: (val) {
-        return val == null
-            ? "Next Payment Date can not be blank."
-            : null;
+        return val == null ? "Next Payment Date can not be blank." : null;
       },
       decoration: InputDecoration(
           labelText: 'Next Payment Date', hasFloatingPlaceholder: false),
@@ -161,10 +156,11 @@ class AddStudentState extends State<AddStudent> {
         height: 30.0,
         child: RaisedButton(
           onPressed: _submit,
-          child: new Text("SUBMIT"),
+          child: new Text("Add"),
           color: Colors.blue,
         ));
-    var addStudentForm = new Container(
+    var addStudentForm = new SingleChildScrollView(
+      scrollDirection: Axis.vertical,
         child: new Column(
           children: <Widget>[
             new Text(
@@ -217,7 +213,7 @@ class AddStudentState extends State<AddStudent> {
                     padding: const EdgeInsets.all(4.0),
                     child: new TextFormField(
                       keyboardType: TextInputType.number,
-                      onSaved: (val) => _phoneNumber = val,
+                      onSaved: (val) => _phoneNumber = int.parse(val),
                       validator: validatePhoneNumber,
                       decoration:
                           new InputDecoration(labelText: "Phone Number"),
@@ -258,13 +254,24 @@ class AddStudentState extends State<AddStudent> {
           ],
           crossAxisAlignment: CrossAxisAlignment.center,
         ),
-        height: 1200.0,
-        width: 400.0,
-        decoration:
-            new BoxDecoration(color: Colors.grey.shade200.withOpacity(1)));
+       );
 
     return new Scaffold(
-        appBar: null,
+        appBar: new AppBar(
+            title: new Text(
+                "Add") /*,
+          actions: <Widget>[
+            FlatButton(
+              textColor: Colors.white,
+              onPressed: () {
+                Navigator.of(context).pushReplacementNamed('/login');
+              },
+              child:
+                  Text("Logout", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              shape: CircleBorder(side: BorderSide(color: Colors.transparent)),
+            ),
+          ],*/
+            ),
         key: scaffoldKey,
         body: new Container(
           child: new Container(

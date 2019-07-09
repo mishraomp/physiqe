@@ -7,18 +7,22 @@ class MemberPaymentHistory {
   MemberPaymentHistory.map(dynamic obj) {
     this._paymentDate = obj["paymentDate"];
     this._paymentAmount = obj["paymentAmount"];
-    this._id = obj["studentId"];
+    this._id = obj["memberId"];
   }
 
   set memberId(int id) => this._id = id;
 
   int get memberId => _id;
 
+  String get paymentAmount => _paymentAmount;
+
+  String get paymentDate => _paymentDate;
+
   Map<String, dynamic> toMap() {
     var map = new Map<String, dynamic>();
     map["paymentDate"] = _paymentDate;
     map["paymentAmount"] = _paymentAmount;
-    map["studentId"] = _id;
+    map["memberId"] = _id;
     return map;
   }
 }

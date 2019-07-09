@@ -24,7 +24,7 @@ class PhysiqueGymApp extends StatelessWidget {
 
   void saveUser() async {
     var db = new DatabaseHelper();
-    await db.deleteUsers();
+    //await db.deleteUsers();
     User user = new User('kc', 'kc123#');
     await db.saveUser(user);
   }
