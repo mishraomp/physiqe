@@ -43,7 +43,7 @@ class DatabaseHelper {
   initDb() async {
     io.Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, "physique_gym.db");
-    await deleteDatabase(path);
+    //await deleteDatabase(path);
     var theDb = await openDatabase(path, version: 1, onCreate: _onCreate);
     return theDb;
   }
@@ -110,6 +110,41 @@ class DatabaseHelper {
         paymentHistory.memberId = result;
         await txn.insert(ApplicationConstants.TABLE_MEMBER_PAYMENT_INFO,
             paymentHistory.toMap());
+      });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  Future<bool> addPaymentToExistingMember(
+      final Member member, final MemberPaymentHistory paymentHistory) async {
+    try {
+      var dbClient = await db;
+      await dbClient.transaction((txn) async {
+        await txn.update(ApplicationConstants.TABLE_MEMBER, member.toMap(),
+            where: "id = ?",
+            whereArgs: [member.id],
+            conflictAlgorithm: ConflictAlgorithm.replace);
+        paymentHistory.memberId = member.id;
+        await txn.insert(ApplicationConstants.TABLE_MEMBER_PAYMENT_INFO,
+            paymentHistory.toMap());
+      });
+      return true;
+    } catch (error) {
+      print(error);
+      return false;
+    }
+  }
+
+  Future<bool> updateMember(final Member member) async {
+    try {
+      var dbClient = await db;
+      await dbClient.transaction((txn) async {
+        await txn.update(ApplicationConstants.TABLE_MEMBER, member.toMap(),
+            where: "id = ?",
+            whereArgs: [member.id],
+            conflictAlgorithm: ConflictAlgorithm.replace);
       });
       return true;
     } catch (error) {

@@ -9,15 +9,13 @@ class SearchMember extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return SearchMemberState();
   }
 }
 
 class SearchMemberState extends State<SearchMember> {
   String _phoneNumber;
-  List<MemberDetails> _memebrs;
-  BuildContext _ctx;
+  List<MemberDetails> _members;
   var picture;
   final scaffoldKey = new GlobalKey<ScaffoldState>();
   final formKey = new GlobalKey<FormState>();
@@ -56,11 +54,10 @@ class SearchMemberState extends State<SearchMember> {
       form.save();
       Map<String, String> queryMap = {'phoneNumber': _phoneNumber};
       var res = await getMemberDetails(queryMap);
-      await
       setState(() {
-        this._memebrs = res;
+        this._members = res;
       });
-      if (this._memebrs == null || this._memebrs.length == 0) {
+      if (this._members == null || this._members.length == 0) {
         _showSnackBar("Phoner Number is not mapped to any member.", Colors.red);
       } else {
         Navigator.push(
@@ -68,7 +65,7 @@ class SearchMemberState extends State<SearchMember> {
             MaterialPageRoute(
                 builder: (context) => new MemberPaymentHistoryDetails(),
                 settings: RouteSettings(
-                  arguments: this._memebrs
+                  arguments: this._members
                 )));
       }
     }
@@ -126,7 +123,7 @@ class SearchMemberState extends State<SearchMember> {
           ],
           crossAxisAlignment: CrossAxisAlignment.center,
         ),
-        height: 1200.0,
+        height: 1200,
         width: 400.0,
         decoration:
             new BoxDecoration(color: Colors.grey.shade200.withOpacity(1)));

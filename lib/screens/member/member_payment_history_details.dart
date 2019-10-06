@@ -19,6 +19,7 @@ class MemberPaymentHistoryDetails extends StatefulWidget {
 
 class MemberPaymentHistoryDetailsState
     extends State<MemberPaymentHistoryDetails> {
+  double height;
   List<MemberDetails> members;
   List<MemberDetails> selectedUsers;
   bool sort;
@@ -64,13 +65,11 @@ class MemberPaymentHistoryDetailsState
   }
 
   SingleChildScrollView dataBody() {
-    const base64 = const Base64Codec();
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Column(children: <Widget>[
-
         DataTable(
-
+          dataRowHeight: 60,
           columns: [
             DataColumn(
               label: Text("FIRST NAME"),
@@ -89,39 +88,38 @@ class MemberPaymentHistoryDetailsState
             ),
             DataColumn(
               label: Text("Next Payment Date"),
-              numeric: true,
+              numeric: false,
               tooltip: "Next Payment Date",
             ),
           ],
           rows: members
               .map(
                 (member) => DataRow(
-                        /*selected: selectedUsers.contains(member),
+                    /*selected: selectedUsers.contains(member),
                         onSelectChanged: (b) {
                           print("Onselect");
                           onSelectedRow(b, member);
                         },*/
-                        cells: [
-                          DataCell(
-                            Text(member.memberDetails.firstName),
-                            onTap: () {
-                              print(
-                                  'Selected ${member.memberDetails.firstName}');
-                            },
-                          ),
-                          DataCell(
-                            Text(member.memberDetails.lastName),
-                          ),
-                          DataCell(
-                            Text(member.memberDetails.phoneNumber.toString()),
-                          ),
-                          DataCell(
-                            Text(new DateFormat.yMMMMd("en_US")
-                                .format(DateTime.parse(
-                                    member.memberDetails.nextPaymentDate))
-                                .toString()),
-                          ),
-                        ]),
+                    cells: [
+                      DataCell(
+                        Text(member.memberDetails.firstName),
+                        onTap: () {
+                          print('Selected ${member.memberDetails.firstName}');
+                        },
+                      ),
+                      DataCell(
+                        Text(member.memberDetails.lastName),
+                      ),
+                      DataCell(
+                        Text(member.memberDetails.phoneNumber.toString()),
+                      ),
+                      DataCell(
+                        Text(new DateFormat.yMMMMd("en_US")
+                            .format(DateTime.parse(
+                                member.memberDetails.nextPaymentDate))
+                            .toString()),
+                      ),
+                    ]),
               )
               .toList(),
         ),
@@ -130,7 +128,6 @@ class MemberPaymentHistoryDetailsState
   }
 
   SingleChildScrollView paymentHistory() {
-
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(children: <Widget>[
@@ -149,18 +146,16 @@ class MemberPaymentHistoryDetailsState
               .memberPaymentDetails
               .map(
                 (memberPaymentDetails) => DataRow(cells: [
-                      DataCell(Text(new DateFormat.yMMMMd("en_US")
-                          .format(
-                              DateTime.parse(memberPaymentDetails.paymentDate))
-                          .toString())),
-                      DataCell(
-                        Text(memberPaymentDetails.paymentAmount),
-                        onTap: () {
-                          print(
-                              'Selected ${memberPaymentDetails.paymentAmount}');
-                        },
-                      )
-                    ]),
+                  DataCell(Text(new DateFormat.yMMMMd("en_US")
+                      .format(DateTime.parse(memberPaymentDetails.paymentDate))
+                      .toString())),
+                  DataCell(
+                    Text(memberPaymentDetails.paymentAmount),
+                    onTap: () {
+                      print('Selected ${memberPaymentDetails.paymentAmount}');
+                    },
+                  )
+                ]),
               )
               .toList(),
         ),
@@ -170,6 +165,8 @@ class MemberPaymentHistoryDetailsState
 
   @override
   Widget build(BuildContext context) {
+    height = MediaQuery.of(context).size.height;
+    print("height is $height");
     const base64 = const Base64Codec();
     members = ModalRoute.of(context).settings.arguments;
     return Scaffold(
@@ -177,32 +174,29 @@ class MemberPaymentHistoryDetailsState
         title: Text(widget.title),
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         verticalDirection: VerticalDirection.down,
         children: <Widget>[
           new Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.all(2.0),
             child: members[0].memberDetails.image != null
                 ? Image.memory(
-              base64.decode(members[0].memberDetails.image),
-              height: 300,
-              width: 300,
-            )
+                    base64.decode(members[0].memberDetails.image),
+                    height: 240,
+                    width: 300,
+                  )
                 : null,
           ),
-          Expanded(
-            child: new Container(
-              height: 200,
-              child: dataBody(),
-            ),
+          ClipRect(
+            child: dataBody(),
           ),
           Expanded(
-            child: new Container(
-              child: paymentHistory(),
-            ),
+            child: paymentHistory(),
           ),
-          Row(
+
+          /* Row(
 
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
@@ -222,7 +216,7 @@ class MemberPaymentHistoryDetailsState
                 ),
               ),
             ],
-          ),
+          ),*/
         ],
       ),
     );
