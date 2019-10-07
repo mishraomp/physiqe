@@ -21,8 +21,6 @@ class EditMemberState extends State<EditMember> {
       _lastName,
       _studentImage,
       _studentAddress,
-      _paymentAmount,
-      _paymentDate,
       _nextPaymentDate;
   int _phoneNumber;
   File _memberImage;
@@ -47,10 +45,10 @@ class EditMemberState extends State<EditMember> {
       setState(() => _isLoading = true);
       form.save();
       var members =
-      await new DatabaseHelper().findMemberByPhoneNumber(this._phoneNumber);
+          await new DatabaseHelper().findMemberByPhoneNumber(this._phoneNumber);
       if (members.length == 0) {
         List<int> image =
-        _memberImage != null ? await _memberImage.readAsBytes() : [];
+            _memberImage != null ? await _memberImage.readAsBytes() : [];
         if (image.isNotEmpty) {
           String encodedImage = base64.encode(image);
           this._studentImage = encodedImage;
@@ -62,10 +60,9 @@ class EditMemberState extends State<EditMember> {
             this._studentImage,
             this._nextPaymentDate,
             this._studentAddress);
-        MemberPaymentHistory paymentHistory =
-        new MemberPaymentHistory(this._paymentDate, this._paymentAmount);
-        var result =
-        await new DatabaseHelper().addNewMember(member, paymentHistory);
+
+        var result = true;
+            //await new DatabaseHelper().addNewMember(member, paymentHistory);
         if (result) {
           setState(() {
             _isLoading = false;
@@ -80,7 +77,8 @@ class EditMemberState extends State<EditMember> {
         print(result);
       } else {
         _showSnackBar(
-            "Phoner Number is already used by another member.", Colors.red);
+            "Phoner Number is already used by another member.${members[0].firstName + " " + members[0].lastName}",
+            Colors.red);
         setState(() => _isLoading = false);
       }
     }
@@ -119,31 +117,16 @@ class EditMemberState extends State<EditMember> {
 
     _ctx = context;
     DateTime date;
-    var paymentDatePicker = DateTimeField(initialValue: DateTime.now(),readOnly: true,
-      format: new DateFormat.yMMMMd("en_US"),
-      onShowPicker: (context, currentValue) {
-        return showDatePicker(
-            context: context,
-            firstDate: DateTime(2018),
-            initialDate: DateTime.now(),
-            lastDate: DateTime(2118));
-      },
-      onSaved: (val) => _paymentDate = val.toString(),
-      validator: (val) {
-        return val == null ? "Payment Date can not be blank." : null;
-      },
-      decoration: InputDecoration(
-          labelText: 'Payment Date', hasFloatingPlaceholder: false),
-      onChanged: (dt) => setState(() => date = dt),
-    );
-    var nextPaymentDatePicker = DateTimeField(readOnly: true,
+
+    var nextPaymentDatePicker = DateTimeField(
+      readOnly: true,
       format: new DateFormat.yMMMMd("en_US"),
       initialValue: DateTime.now().add(Duration(days: 30)),
       onShowPicker: (context, currentVal) {
         return showDatePicker(
             context: context,
             firstDate: DateTime(2018),
-            initialDate:  currentVal ?? DateTime.now().add(Duration(days: 30)) ,
+            initialDate: currentVal ?? DateTime.now().add(Duration(days: 30)),
             lastDate: DateTime(2118));
       },
       onSaved: (val) => _nextPaymentDate = val.toString(),
@@ -182,10 +165,10 @@ class EditMemberState extends State<EditMember> {
                   padding: const EdgeInsets.all(4.0),
                   child: _memberImage == null
                       ? FloatingActionButton(
-                    onPressed: getImage,
-                    tooltip: 'Add Image',
-                    child: Icon(Icons.add_a_photo),
-                  )
+                          onPressed: getImage,
+                          tooltip: 'Add Image',
+                          child: Icon(Icons.add_a_photo),
+                        )
                       : Image.file(_memberImage),
                 ),
                 new Padding(
@@ -218,8 +201,7 @@ class EditMemberState extends State<EditMember> {
                     keyboardType: TextInputType.number,
                     onSaved: (val) => _phoneNumber = int.parse(val),
                     validator: validatePhoneNumber,
-                    decoration:
-                    new InputDecoration(labelText: "Phone Number"),
+                    decoration: new InputDecoration(labelText: "Phone Number"),
                   ),
                 ),
                 new Padding(
@@ -234,19 +216,6 @@ class EditMemberState extends State<EditMember> {
                     decoration: new InputDecoration(labelText: "Address"),
                   ),
                 ),
-                new Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: new TextFormField(
-                    keyboardType: TextInputType.number,
-                    onSaved: (val) => _paymentAmount = val,
-                    validator: validatePaymentAmount,
-                    decoration:
-                    new InputDecoration(labelText: "Payment Amount"),
-                  ),
-                ),
-                new Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: paymentDatePicker),
                 new Padding(
                     padding: const EdgeInsets.all(4.0),
                     child: nextPaymentDatePicker),
@@ -274,7 +243,7 @@ class EditMemberState extends State<EditMember> {
               shape: CircleBorder(side: BorderSide(color: Colors.transparent)),
             ),
           ],*/
-        ),
+            ),
         key: scaffoldKey,
         body: new Container(
           child: new Container(

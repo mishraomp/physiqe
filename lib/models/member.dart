@@ -58,4 +58,28 @@ class Member {
     map["address"] = _studentAddress;
     return map;
   }
+
+  @override
+  String toString() {
+    String memberImage = _studentImage == null ? "" : _studentImage;
+    String nextPaymentDate = _nextPaymentDate == null ? "" : _nextPaymentDate;
+    String memberString = "First Name : " +
+        _firstName +
+        " , " +
+        "Last Name : " +
+        _lastName +
+        " , " +
+        "Phoner Number : " +
+        _phoneNumber.toString() +
+        " , " +
+        "Address : " +
+        _studentAddress +
+        " , " +
+        "Image : " +
+        memberImage +
+        " , " +
+        "Next Payment Date : " +
+        nextPaymentDate;
+    return memberString;
+  }
 }

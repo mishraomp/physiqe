@@ -24,17 +24,6 @@ class SearchMemberState extends State<SearchMember> {
   Future<List<MemberDetails>> getMemberDetails(Map queryMap) async {
     var db = new DatabaseHelper();
     List<MemberDetails> results = await db.retrieveMembers(queryMap);
-   /* await db.addPaymentDetails(results[0].memberDetails.id, DateTime.now(), 201);
-    await db.addPaymentDetails(results[0].memberDetails.id, DateTime.now().add(Duration(days: 1)), 202);
-    await db.addPaymentDetails(results[0].memberDetails.id, DateTime.now().add(Duration(days: 2)), 203);
-    await db.addPaymentDetails(results[0].memberDetails.id, DateTime.now().add(Duration(days: 3)), 204);
-    await db.addPaymentDetails(results[0].memberDetails.id, DateTime.now().add(Duration(days: 4)), 205);
-    await db.addPaymentDetails(results[0].memberDetails.id, DateTime.now().add(Duration(days: 5)), 206);
-    await db.addPaymentDetails(results[0].memberDetails.id, DateTime.now().add(Duration(days: 6)), 207);
-    await db.addPaymentDetails(results[0].memberDetails.id, DateTime.now().add(Duration(days: 7)), 208);
-    await db.addPaymentDetails(results[0].memberDetails.id, DateTime.now().add(Duration(days: 8)), 209);
-    await db.addPaymentDetails(results[0].memberDetails.id, DateTime.now().add(Duration(days: 9)), 210);*/
-
     return results;
   }
 

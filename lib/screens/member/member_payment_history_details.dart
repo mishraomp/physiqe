@@ -66,65 +66,68 @@ class MemberPaymentHistoryDetailsState
 
   SingleChildScrollView dataBody() {
     return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Column(children: <Widget>[
-        DataTable(
-          dataRowHeight: 60,
-          columns: [
-            DataColumn(
-              label: Text("FIRST NAME"),
-              numeric: false,
-              tooltip: "This is First Name",
-            ),
-            DataColumn(
-              label: Text("LAST NAME"),
-              numeric: false,
-              tooltip: "This is Last Name",
-            ),
-            DataColumn(
-              label: Text("Phone Number"),
-              numeric: true,
-              tooltip: "This is Phone Number",
-            ),
-            DataColumn(
-              label: Text("Next Payment Date"),
-              numeric: false,
-              tooltip: "Next Payment Date",
-            ),
-          ],
-          rows: members
-              .map(
-                (member) => DataRow(
-                    /*selected: selectedUsers.contains(member),
+        scrollDirection: Axis.vertical,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Column(children: <Widget>[
+            DataTable(
+              dataRowHeight: 60,
+              columns: [
+                DataColumn(
+                  label: Text("First Name"),
+                  numeric: false,
+                  tooltip: "This is First Name",
+                ),
+                DataColumn(
+                  label: Text("Last Name"),
+                  numeric: false,
+                  tooltip: "This is Last Name",
+                ),
+                DataColumn(
+                  label: Text("Phone Number"),
+                  numeric: true,
+                  tooltip: "This is Phone Number",
+                ),
+                DataColumn(
+                  label: Text("Next Payment Date"),
+                  numeric: false,
+                  tooltip: "Next Payment Date",
+                ),
+              ],
+              rows: members
+                  .map(
+                    (member) => DataRow(
+                        /*selected: selectedUsers.contains(member),
                         onSelectChanged: (b) {
                           print("Onselect");
                           onSelectedRow(b, member);
                         },*/
-                    cells: [
-                      DataCell(
-                        Text(member.memberDetails.firstName),
-                        onTap: () {
-                          print('Selected ${member.memberDetails.firstName}');
-                        },
-                      ),
-                      DataCell(
-                        Text(member.memberDetails.lastName),
-                      ),
-                      DataCell(
-                        Text(member.memberDetails.phoneNumber.toString()),
-                      ),
-                      DataCell(
-                        Text(new DateFormat.yMMMMd("en_US")
-                            .format(DateTime.parse(
-                                member.memberDetails.nextPaymentDate))
-                            .toString()),
-                      ),
-                    ]),
-              )
-              .toList(),
-        ),
-      ]),
-    );
+                        cells: [
+                          DataCell(
+                            Text(member.memberDetails.firstName),
+                            onTap: () {
+                              print(
+                                  'Selected ${member.memberDetails.firstName}');
+                            },
+                          ),
+                          DataCell(
+                            Text(member.memberDetails.lastName),
+                          ),
+                          DataCell(
+                            Text(member.memberDetails.phoneNumber.toString()),
+                          ),
+                          DataCell(
+                            Text(new DateFormat.yMMMMd("en_US")
+                                .format(DateTime.parse(
+                                    member.memberDetails.nextPaymentDate))
+                                .toString()),
+                          ),
+                        ]),
+                  )
+                  .toList(),
+            ),
+          ]),
+        ));
   }
 
   SingleChildScrollView paymentHistory() {
@@ -134,11 +137,11 @@ class MemberPaymentHistoryDetailsState
         DataTable(
           columns: [
             DataColumn(
-              label: Text("PAYMENT DATE"),
+              label: Text("Payment Date"),
               numeric: false,
             ),
             DataColumn(
-              label: Text("PAYMENT AMOUNT"),
+              label: Text("Payment Amount"),
               numeric: true,
             ),
           ],
@@ -196,7 +199,7 @@ class MemberPaymentHistoryDetailsState
             child: paymentHistory(),
           ),
 
-          /* Row(
+          /*Row(
 
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,

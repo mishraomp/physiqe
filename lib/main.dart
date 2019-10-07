@@ -13,9 +13,9 @@ class PhysiqueGymApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-   /* Timer.periodic(Duration(seconds: 5), (timer) {
+    Timer.periodic(Duration(hours: 12), (timer) {
       print(DateTime.now());
-    });*/
+    });
     imageCache.clear();
     saveUser();
     return new MaterialApp(

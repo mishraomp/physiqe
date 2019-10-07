@@ -80,7 +80,7 @@ class AddMemberState extends State<AddMember> {
         print(result);
       } else {
         _showSnackBar(
-            "Phoner Number is already used by another member.", Colors.red);
+            "Phoner Number is already used by another member.${members[0].firstName + " " + members[0].lastName}", Colors.red);
         setState(() => _isLoading = false);
       }
     }
@@ -119,31 +119,34 @@ class AddMemberState extends State<AddMember> {
 
     _ctx = context;
     DateTime date;
-    var paymentDatePicker = DateTimeField(initialValue: DateTime.now(),readOnly: true,
+    var paymentDatePicker = DateTimeField(
+      initialValue: DateTime.now(),
+      readOnly: true,
       format: new DateFormat.yMMMMd("en_US"),
-        onShowPicker: (context, currentValue) {
-          return showDatePicker(
-              context: context,
-              firstDate: DateTime(2018),
-              initialDate: DateTime.now(),
-              lastDate: DateTime(2118));
-        },
+      onShowPicker: (context, currentValue) {
+        return showDatePicker(
+            context: context,
+            firstDate: DateTime(2018),
+            initialDate: DateTime.now(),
+            lastDate: DateTime(2118));
+      },
       onSaved: (val) => _paymentDate = val.toString(),
       validator: (val) {
         return val == null ? "Payment Date can not be blank." : null;
       },
       decoration: InputDecoration(
-          labelText: 'Payment Date', hasFloatingPlaceholder: false),
+          labelText: 'Payment Date', hasFloatingPlaceholder: true),
       onChanged: (dt) => setState(() => date = dt),
     );
-    var nextPaymentDatePicker = DateTimeField(readOnly: true,
+    var nextPaymentDatePicker = DateTimeField(
+      readOnly: true,
       format: new DateFormat.yMMMMd("en_US"),
       initialValue: DateTime.now().add(Duration(days: 30)),
       onShowPicker: (context, currentVal) {
         return showDatePicker(
             context: context,
             firstDate: DateTime(2018),
-            initialDate:  currentVal ?? DateTime.now().add(Duration(days: 30)) ,
+            initialDate: currentVal ?? DateTime.now().add(Duration(days: 30)),
             lastDate: DateTime(2118));
       },
       onSaved: (val) => _nextPaymentDate = val.toString(),
@@ -151,7 +154,7 @@ class AddMemberState extends State<AddMember> {
         return val == null ? "Next Payment Date can not be blank." : null;
       },
       decoration: InputDecoration(
-          labelText: 'Next Payment Date', hasFloatingPlaceholder: false),
+          labelText: 'Next Payment Date', hasFloatingPlaceholder: true),
       onChanged: (dt) => setState(() => date = dt),
     );
     var submitBtn = ButtonTheme(
@@ -164,100 +167,101 @@ class AddMemberState extends State<AddMember> {
         ));
     var addStudentForm = new SingleChildScrollView(
       scrollDirection: Axis.vertical,
-        child: new Column(
-          children: <Widget>[
-            new Text(
-              "Add New Member",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.blue),
-              textScaleFactor: 1.5,
+      child: new Column(
+        children: <Widget>[
+          new Text(
+            "Add New Member",
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontStyle: FontStyle.italic,
+                color: Colors.blue),
+            textScaleFactor: 1.5,
+          ),
+          new Form(
+            key: formKey,
+            child: new Column(
+              children: <Widget>[
+                new Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: _memberImage == null
+                      ? FloatingActionButton(
+                          onPressed: getImage,
+                          tooltip: 'Add Image',
+                          child: Icon(Icons.add_a_photo),
+                        )
+                      : Image.file(_memberImage),
+                ),
+                new Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: new TextFormField(
+                    onSaved: (val) => _firstName = val,
+                    validator: (val) {
+                      return val.length < 1
+                          ? "First Name can not be blank."
+                          : null;
+                    },
+                    decoration: new InputDecoration(labelText: "First Name"),
+                  ),
+                ),
+                new Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: new TextFormField(
+                    onSaved: (val) => _lastName = val,
+                    validator: (val) {
+                      return val.length < 1
+                          ? "Last Name can not be blank."
+                          : null;
+                    },
+                    decoration: new InputDecoration(labelText: "Last Name"),
+                  ),
+                ),
+                new Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: new TextFormField(
+                    keyboardType: TextInputType.number,
+                    onSaved: (val) => _phoneNumber = int.parse(val),
+                    validator: validatePhoneNumber,
+                    decoration: new InputDecoration(labelText: "Phone Number"),
+                  ),
+                ),
+                new Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: new TextFormField(
+                    onSaved: (val) => _studentAddress = val,
+                    validator: (val) {
+                      return val.length < 1
+                          ? "Address can not be blank."
+                          : null;
+                    },
+                    decoration: new InputDecoration(labelText: "Address"),
+                  ),
+                ),
+                new Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: new TextFormField(
+                    keyboardType: TextInputType.number,
+                    onSaved: (val) => _paymentAmount = val,
+                    validator: validatePaymentAmount,
+                    decoration:
+                        new InputDecoration(labelText: "Payment Amount"),
+                  ),
+                ),
+                new Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: paymentDatePicker),
+                new Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: ClipRect(
+                      child: nextPaymentDatePicker,
+                    )),
+              ],
             ),
-            new Form(
-              key: formKey,
-              child: new Column(
-                children: <Widget>[
-                  new Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: _memberImage == null
-                        ? FloatingActionButton(
-                            onPressed: getImage,
-                            tooltip: 'Add Image',
-                            child: Icon(Icons.add_a_photo),
-                          )
-                        : Image.file(_memberImage),
-                  ),
-                  new Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: new TextFormField(
-                      onSaved: (val) => _firstName = val,
-                      validator: (val) {
-                        return val.length < 1
-                            ? "First Name can not be blank."
-                            : null;
-                      },
-                      decoration: new InputDecoration(labelText: "First Name"),
-                    ),
-                  ),
-                  new Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: new TextFormField(
-                      onSaved: (val) => _lastName = val,
-                      validator: (val) {
-                        return val.length < 1
-                            ? "Last Name can not be blank."
-                            : null;
-                      },
-                      decoration: new InputDecoration(labelText: "Last Name"),
-                    ),
-                  ),
-                  new Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: new TextFormField(
-                      keyboardType: TextInputType.number,
-                      onSaved: (val) => _phoneNumber = int.parse(val),
-                      validator: validatePhoneNumber,
-                      decoration:
-                          new InputDecoration(labelText: "Phone Number"),
-                    ),
-                  ),
-                  new Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: new TextFormField(
-                      onSaved: (val) => _studentAddress = val,
-                      validator: (val) {
-                        return val.length < 1
-                            ? "Address can not be blank."
-                            : null;
-                      },
-                      decoration: new InputDecoration(labelText: "Address"),
-                    ),
-                  ),
-                  new Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: new TextFormField(
-                      keyboardType: TextInputType.number,
-                      onSaved: (val) => _paymentAmount = val,
-                      validator: validatePaymentAmount,
-                      decoration:
-                          new InputDecoration(labelText: "Payment Amount"),
-                    ),
-                  ),
-                  new Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: paymentDatePicker),
-                  new Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: nextPaymentDatePicker),
-                ],
-              ),
-            ),
-            _isLoading ? new CircularProgressIndicator() : submitBtn
-          ],
-          crossAxisAlignment: CrossAxisAlignment.center,
-        ),
-       );
+          ),
+          _isLoading ? new CircularProgressIndicator() : submitBtn
+        ],
+        crossAxisAlignment: CrossAxisAlignment.center,
+      ),
+    );
 
     return new Scaffold(
         appBar: new AppBar(

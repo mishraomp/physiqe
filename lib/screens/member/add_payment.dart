@@ -105,7 +105,7 @@ class AddPaymentState extends State<AddPayment> {
         return val == null ? "Payment Date can not be blank." : null;
       },
       decoration: InputDecoration(
-          labelText: 'Payment Date', hasFloatingPlaceholder: false),
+          labelText: 'Payment Date', hasFloatingPlaceholder: true),
       onChanged: (dt) => setState(() => date = dt),
     );
     var nextPaymentDatePicker = DateTimeField(
@@ -124,7 +124,7 @@ class AddPaymentState extends State<AddPayment> {
         return val == null ? "Next Payment Date can not be blank." : null;
       },
       decoration: InputDecoration(
-          labelText: 'Next Payment Date', hasFloatingPlaceholder: false),
+          labelText: 'Next Payment Date', hasFloatingPlaceholder: true),
       onChanged: (dt) => setState(() => date = dt),
     );
     var submitBtn = ButtonTheme(

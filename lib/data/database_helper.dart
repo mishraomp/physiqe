@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io' as io;
-
+import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:physique_gym/models/member_details.dart';
 import 'package:physique_gym/models/user.dart';
@@ -70,11 +70,14 @@ class DatabaseHelper {
     return 0;
   }
 
-  Future<int> deleteMemberDetails() async {
+  Future<int> deleteMemberDetails(int phoneNumber) async {
     var dbClient = await db;
+    var memberDetails = await findMemberByPhoneNumber(phoneNumber);
     await dbClient.transaction((txn) async {
-      await txn.delete(ApplicationConstants.TABLE_MEMBER_PAYMENT_INFO);
-      await txn.delete(ApplicationConstants.TABLE_MEMBER);
+      await txn.delete(ApplicationConstants.TABLE_MEMBER_PAYMENT_INFO,
+          where: "memberId = ?", whereArgs: [memberDetails[0].id]);
+      await txn.delete(ApplicationConstants.TABLE_MEMBER,
+          where: "id = ?", whereArgs: [memberDetails[0].id]);
     });
 
     return 1;
@@ -221,6 +224,21 @@ class DatabaseHelper {
     }
   }
 
+  Future<bool> deletePayments(
+      List<MemberPaymentHistory> paymentHistoryList) async {
+    try {
+      var dbClient = await db;
+      for (var paymentHistory in paymentHistoryList) {
+        await dbClient.delete(ApplicationConstants.TABLE_MEMBER_PAYMENT_INFO,
+            where: " id = ?", whereArgs: [paymentHistory.paymentId]);
+      }
+      return true;
+    } catch (error) {
+      print(error);
+      return false;
+    }
+  }
+
   String buildSql(String sql, Map<String, String> queryMap) {
     if (queryMap == null) {
       return sql;
@@ -236,5 +254,48 @@ class DatabaseHelper {
           });
       return sql + whereClause;
     }
+  }
+
+  Future<List<Member>> getAllMembers() async {
+    List<Member> members = new List();
+    var dbClient = await db;
+    List<Map<String, dynamic>> results =
+        await dbClient.query(ApplicationConstants.TABLE_MEMBER);
+    for (Map item in results) {
+      members.add(Member.map(item));
+    }
+    return members;
+  }
+
+  ///it will return all the members who has the Payment to be made as of Today
+  Future<List<Member>> getAllMembersWithNextPaymentDateDueAsOfToday() async {
+    var date = DateTime.now();
+    List<Member> filteredMembers = new List();
+    List<Member> members = await getAllMembers();
+    for (Member member in members) {
+      var nextPaymentDate = DateTime.parse(member.nextPaymentDate);
+      if (nextPaymentDate.compareTo(date) < 1) {
+        filteredMembers.add(member);
+      }
+    }
+    print(filteredMembers);
+    return filteredMembers;
+  }
+
+  ///it will return all the members who has the Payment to be made This month.
+  Future<List<Member>> getAllMembersWithNextPaymentDateDueCurrentMonth() async {
+    var date = DateTime.now();
+    List<Member> filteredMembers = new List();
+    List<Member> members = await getAllMembers();
+    for (Member member in members) {
+      var nextPaymentDate = DateTime.parse(member.nextPaymentDate);
+      if (nextPaymentDate.compareTo(date) > 0 &&
+          nextPaymentDate.month == date.month &&
+          nextPaymentDate.year == date.year) {
+        filteredMembers.add(member);
+      }
+    }
+    print(filteredMembers);
+    return filteredMembers;
   }
 }
