@@ -59,10 +59,12 @@ class HomePageState extends State<HomeScreen> {
     } else {
       checkIfValueUpdatedInDB();
     }
-    var paymentDueAsOfDateList = this._memberPaymentDueAsOfDateList == null
+    var paymentDueAsOfDateList = (this._memberPaymentDueAsOfDateList == null ||
+            this._memberPaymentDueAsOfDateList.length == 0)
         ? new Container()
         : Container(child: paymentDueAsOfDate());
-    var paymentDueThisMonthList = this._memberPaymentDueThisMonth == null
+    var paymentDueThisMonthList = (this._memberPaymentDueThisMonth == null ||
+            this._memberPaymentDueThisMonth.length == 0)
         ? new Container()
         : Container(child: paymentDueThisMonth());
     var welcome = Padding(
@@ -71,14 +73,17 @@ class HomePageState extends State<HomeScreen> {
             style: new TextStyle(
                 fontWeight: FontWeight.bold, color: Colors.blue)));
 
-    var paymentDueAsOfTodayMessage = this._memberPaymentDueAsOfDateList == null
-        ? new Container()
-        : Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: new Text("Payment Due Data:",
-                style: new TextStyle(
-                    fontWeight: FontWeight.bold, color: Colors.red)));
-    var paymentDueThisMonthMessage = this._memberPaymentDueThisMonth == null
+    var paymentDueAsOfTodayMessage =
+        (this._memberPaymentDueAsOfDateList == null ||
+                this._memberPaymentDueAsOfDateList.length == 0)
+            ? new Container()
+            : Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: new Text("Payment Due Data:",
+                    style: new TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.red)));
+    var paymentDueThisMonthMessage = (this._memberPaymentDueThisMonth == null ||
+            this._memberPaymentDueThisMonth.length == 0)
         ? new Container()
         : Padding(
             padding: const EdgeInsets.all(20.0),

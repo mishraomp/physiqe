@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:io' as io;
-import 'package:intl/intl.dart';
+
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:physique_gym/constants/application_constants.dart';
+import 'package:physique_gym/models/member.dart';
 import 'package:physique_gym/models/member_details.dart';
+import 'package:physique_gym/models/member_payment_history.dart';
 import 'package:physique_gym/models/user.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:physique_gym/models/member.dart';
-import 'package:physique_gym/models/member_payment_history.dart';
-import 'package:physique_gym/constants/application_constants.dart';
 
 class DatabaseHelper {
   final String createTableUser = ApplicationConstants.CREATE_TABLE +
@@ -259,8 +259,14 @@ class DatabaseHelper {
   Future<List<Member>> getAllMembers() async {
     List<Member> members = new List();
     var dbClient = await db;
-    List<Map<String, dynamic>> results =
-        await dbClient.query(ApplicationConstants.TABLE_MEMBER);
+    List<Map<String, dynamic>> results = await dbClient
+        .query(ApplicationConstants.TABLE_MEMBER, columns: [
+      "id",
+      "firstName",
+      "lastName",
+      "phoneNumber",
+      "nextPaymentDate"
+    ]);
     for (Map item in results) {
       members.add(Member.map(item));
     }
@@ -278,7 +284,6 @@ class DatabaseHelper {
         filteredMembers.add(member);
       }
     }
-    print(filteredMembers);
     return filteredMembers;
   }
 

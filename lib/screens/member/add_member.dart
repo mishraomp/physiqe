@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
+
+import 'package:archive/archive.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:physique_gym/data/database_helper.dart';
 import 'package:physique_gym/models/member.dart';
 import 'package:physique_gym/models/member_payment_history.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class AddMember extends StatefulWidget {
   @override
@@ -39,7 +42,21 @@ class AddMemberState extends State<AddMember> {
       _memberImage = image;
     });
   }
-
+  Future<List<int>> getCompressedImage(File file) async {
+    if(file == null){
+      return [];
+    }
+    var result = await FlutterImageCompress.compressWithFile(
+      file.absolute.path,
+      minWidth: 1920,
+      minHeight: 1080,
+      quality: 20,
+      rotate: 0,
+    );
+    print(file.lengthSync());
+    print(result.length);
+    return result;
+  }
   void _submit() async {
     final form = formKey.currentState;
     const base64 = const Base64Codec();
@@ -49,10 +66,11 @@ class AddMemberState extends State<AddMember> {
       var members =
           await new DatabaseHelper().findMemberByPhoneNumber(this._phoneNumber);
       if (members.length == 0) {
-        List<int> image =
-            _memberImage != null ? await _memberImage.readAsBytes() : [];
+        List<int> image = await getCompressedImage(this._memberImage);
         if (image.isNotEmpty) {
-          String encodedImage = base64.encode(image);
+          List<int> gzipBytes = new GZipEncoder().encode(image);
+          String encodedImage = base64.encode(gzipBytes);
+
           this._studentImage = encodedImage;
         }
         Member member = new Member(
@@ -80,7 +98,8 @@ class AddMemberState extends State<AddMember> {
         print(result);
       } else {
         _showSnackBar(
-            "Phoner Number is already used by another member.${members[0].firstName + " " + members[0].lastName}", Colors.red);
+            "Phoner Number is already used by another member.${members[0].firstName + " " + members[0].lastName}",
+            Colors.red);
         setState(() => _isLoading = false);
       }
     }

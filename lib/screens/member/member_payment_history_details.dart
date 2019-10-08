@@ -3,6 +3,7 @@ import 'package:physique_gym/models/member_details.dart';
 import 'dart:convert';
 import 'dart:ui';
 import 'package:intl/intl.dart';
+import 'package:archive/archive.dart';
 
 class MemberPaymentHistoryDetails extends StatefulWidget {
   final List<MemberDetails> members;
@@ -169,7 +170,6 @@ class MemberPaymentHistoryDetailsState
   @override
   Widget build(BuildContext context) {
     height = MediaQuery.of(context).size.height;
-    print("height is $height");
     const base64 = const Base64Codec();
     members = ModalRoute.of(context).settings.arguments;
     return Scaffold(
@@ -186,9 +186,10 @@ class MemberPaymentHistoryDetailsState
             padding: const EdgeInsets.all(2.0),
             child: members[0].memberDetails.image != null
                 ? Image.memory(
-                    base64.decode(members[0].memberDetails.image),
+                    new GZipDecoder().decodeBytes(
+                        base64.decode(members[0].memberDetails.image)),
                     height: 240,
-                    width: 300,
+                    width: 200,
                   )
                 : null,
           ),
