@@ -7,7 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:physique_gym/data/database_helper.dart';
 import 'package:physique_gym/models/member.dart';
-import 'package:physique_gym/models/member_payment_history.dart';
+import 'package:physique_gym/models/member_details.dart';
+import 'package:archive/archive.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class EditMember extends StatefulWidget {
   @override
@@ -17,6 +19,8 @@ class EditMember extends StatefulWidget {
 }
 
 class EditMemberState extends State<EditMember> {
+  List<MemberDetails> members;
+  List<MemberDetails> membersOld;
   String _firstName,
       _lastName,
       _studentImage,
@@ -30,12 +34,30 @@ class EditMemberState extends State<EditMember> {
   final formKey = new GlobalKey<FormState>();
   bool _isLoading = false;
 
+  Future<List<int>> getCompressedImage(File file) async {
+    if (file == null) {
+      return [];
+    }
+    var result = await FlutterImageCompress.compressWithFile(
+      file.absolute.path,
+      minWidth: 1920,
+      minHeight: 1080,
+      quality: 20,
+      rotate: 0,
+    );
+    return result;
+  }
+
   Future getImage() async {
     var image = await ImagePicker.pickImage(source: ImageSource.camera);
-
-    setState(() {
-      _memberImage = image;
-    });
+    List<int> imageList = await getCompressedImage(image);
+    if (imageList.isNotEmpty) {
+      List<int> gzipBytes = new GZipEncoder().encode(imageList);
+      String encodedImage = base64.encode(gzipBytes);
+      setState(() {
+        this.members[0].memberDetails.image = encodedImage;
+      });
+    }
   }
 
   void _submit() async {
@@ -62,7 +84,7 @@ class EditMemberState extends State<EditMember> {
             this._studentAddress);
 
         var result = true;
-            //await new DatabaseHelper().addNewMember(member, paymentHistory);
+        //await new DatabaseHelper().addNewMember(member, paymentHistory);
         if (result) {
           setState(() {
             _isLoading = false;
@@ -96,6 +118,8 @@ class EditMemberState extends State<EditMember> {
 
   @override
   Widget build(BuildContext context) {
+    members = ModalRoute.of(context).settings.arguments;
+    membersOld =  ModalRoute.of(context).settings.arguments; // assign it here for comparison during submit, if no updates to any field stop form submission.
     // Obtain a list of the available cameras on the device.
     String validatePaymentAmount(val) {
       if (val.length < 1) {
@@ -126,7 +150,9 @@ class EditMemberState extends State<EditMember> {
         return showDatePicker(
             context: context,
             firstDate: DateTime(2018),
-            initialDate: currentVal ?? DateTime.now().add(Duration(days: 30)),
+            initialDate:
+                DateTime.parse(this.members[0].memberDetails.nextPaymentDate) ??
+                    DateTime.now().add(Duration(days: 30)),
             lastDate: DateTime(2118));
       },
       onSaved: (val) => _nextPaymentDate = val.toString(),
@@ -134,7 +160,7 @@ class EditMemberState extends State<EditMember> {
         return val == null ? "Next Payment Date can not be blank." : null;
       },
       decoration: InputDecoration(
-          labelText: 'Next Payment Date', hasFloatingPlaceholder: false),
+          labelText: 'Next Payment Date', hasFloatingPlaceholder: true),
       onChanged: (dt) => setState(() => date = dt),
     );
     var submitBtn = ButtonTheme(
@@ -142,15 +168,15 @@ class EditMemberState extends State<EditMember> {
         height: 30.0,
         child: RaisedButton(
           onPressed: _submit,
-          child: new Text("Add"),
+          child: new Text("Update"),
           color: Colors.blue,
         ));
-    var addStudentForm = new SingleChildScrollView(
+    var editMemberForm = new SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: new Column(
         children: <Widget>[
           new Text(
-            "Add New Member",
+            "Edit Existing Member",
             style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontStyle: FontStyle.italic,
@@ -161,19 +187,23 @@ class EditMemberState extends State<EditMember> {
             key: formKey,
             child: new Column(
               children: <Widget>[
-                new Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: _memberImage == null
-                      ? FloatingActionButton(
-                          onPressed: getImage,
-                          tooltip: 'Add Image',
-                          child: Icon(Icons.add_a_photo),
-                        )
-                      : Image.file(_memberImage),
-                ),
-                new Padding(
+                Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: InkWell(
+                      child: this.members[0].memberDetails.image == null
+                          ? FloatingActionButton(
+                              onPressed: getImage,
+                              tooltip: 'Add Image',
+                              child: Icon(Icons.add_a_photo),
+                            )
+                          : Image.memory(new GZipDecoder().decodeBytes(base64
+                              .decode(this.members[0].memberDetails.image))),
+                      onTap: getImage,
+                    )),
+                Padding(
                   padding: const EdgeInsets.all(4.0),
                   child: new TextFormField(
+                    initialValue: this.members[0].memberDetails.firstName,
                     onSaved: (val) => _firstName = val,
                     validator: (val) {
                       return val.length < 1
@@ -186,6 +216,7 @@ class EditMemberState extends State<EditMember> {
                 new Padding(
                   padding: const EdgeInsets.all(4.0),
                   child: new TextFormField(
+                    initialValue: this.members[0].memberDetails.lastName,
                     onSaved: (val) => _lastName = val,
                     validator: (val) {
                       return val.length < 1
@@ -198,6 +229,8 @@ class EditMemberState extends State<EditMember> {
                 new Padding(
                   padding: const EdgeInsets.all(4.0),
                   child: new TextFormField(
+                    initialValue:
+                        this.members[0].memberDetails.phoneNumber.toString(),
                     keyboardType: TextInputType.number,
                     onSaved: (val) => _phoneNumber = int.parse(val),
                     validator: validatePhoneNumber,
@@ -207,6 +240,7 @@ class EditMemberState extends State<EditMember> {
                 new Padding(
                   padding: const EdgeInsets.all(4.0),
                   child: new TextFormField(
+                    initialValue: this.members[0].memberDetails.address,
                     onSaved: (val) => _studentAddress = val,
                     validator: (val) {
                       return val.length < 1
@@ -231,7 +265,7 @@ class EditMemberState extends State<EditMember> {
     return new Scaffold(
         appBar: new AppBar(
             title: new Text(
-                "Add") /*,
+                "Edit") /*,
           actions: <Widget>[
             FlatButton(
               textColor: Colors.white,
@@ -249,7 +283,7 @@ class EditMemberState extends State<EditMember> {
           child: new Container(
             child: new Center(
               child: new ClipRect(
-                child: ListView(children: <Widget>[addStudentForm]),
+                child: ListView(children: <Widget>[editMemberForm]),
               ),
             ),
           ),

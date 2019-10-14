@@ -256,7 +256,7 @@ class DatabaseHelper {
     }
   }
 
-  Future<List<Member>> getAllMembers() async {
+  Future<List<Member>> getAllMembersWithSelectedCols() async {
     List<Member> members = new List();
     var dbClient = await db;
     List<Map<String, dynamic>> results = await dbClient
@@ -277,7 +277,7 @@ class DatabaseHelper {
   Future<List<Member>> getAllMembersWithNextPaymentDateDueAsOfToday() async {
     var date = DateTime.now();
     List<Member> filteredMembers = new List();
-    List<Member> members = await getAllMembers();
+    List<Member> members = await getAllMembersWithSelectedCols();
     for (Member member in members) {
       var nextPaymentDate = DateTime.parse(member.nextPaymentDate);
       if (nextPaymentDate.compareTo(date) < 1) {
@@ -291,7 +291,7 @@ class DatabaseHelper {
   Future<List<Member>> getAllMembersWithNextPaymentDateDueCurrentMonth() async {
     var date = DateTime.now();
     List<Member> filteredMembers = new List();
-    List<Member> members = await getAllMembers();
+    List<Member> members = await getAllMembersWithSelectedCols();
     for (Member member in members) {
       var nextPaymentDate = DateTime.parse(member.nextPaymentDate);
       if (nextPaymentDate.compareTo(date) > 0 &&
@@ -300,7 +300,6 @@ class DatabaseHelper {
         filteredMembers.add(member);
       }
     }
-    print(filteredMembers);
     return filteredMembers;
   }
 }

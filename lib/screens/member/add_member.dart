@@ -42,8 +42,9 @@ class AddMemberState extends State<AddMember> {
       _memberImage = image;
     });
   }
+
   Future<List<int>> getCompressedImage(File file) async {
-    if(file == null){
+    if (file == null) {
       return [];
     }
     var result = await FlutterImageCompress.compressWithFile(
@@ -53,10 +54,9 @@ class AddMemberState extends State<AddMember> {
       quality: 20,
       rotate: 0,
     );
-    print(file.lengthSync());
-    print(result.length);
     return result;
   }
+
   void _submit() async {
     final form = formKey.currentState;
     const base64 = const Base64Codec();
@@ -184,7 +184,7 @@ class AddMemberState extends State<AddMember> {
           child: new Text("Add"),
           color: Colors.blue,
         ));
-    var addStudentForm = new SingleChildScrollView(
+    var addMemberForm = new SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: new Column(
         children: <Widget>[
@@ -303,7 +303,7 @@ class AddMemberState extends State<AddMember> {
           child: new Container(
             child: new Center(
               child: new ClipRect(
-                child: ListView(children: <Widget>[addStudentForm]),
+                child: ListView(children: <Widget>[addMemberForm]),
               ),
             ),
           ),

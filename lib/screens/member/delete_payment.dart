@@ -41,23 +41,23 @@ class DeleteMemberPaymentState extends State<DeleteMemberPayment> {
   }
 
   deleteSelected() async {
-      if (_selectedPayments.isNotEmpty) {
-        List<MemberPaymentHistory> temp = [];
-        temp.addAll(_selectedPayments);
-        //make db call
-        var db = new DatabaseHelper();
-        var result = await db.deletePayments(temp);
-        if (result) {
-          setState(() {
-            for (MemberPaymentHistory paymentHistory in temp) {
-              this._members[0].memberPaymentDetails.remove(paymentHistory);
-              _selectedPayments.remove(paymentHistory);
-            }
-          });
-        }else {
-          _showSnackBar("Could Not Delete The Records", Colors.red);
-        }
+    if (_selectedPayments.isNotEmpty) {
+      List<MemberPaymentHistory> temp = [];
+      temp.addAll(_selectedPayments);
+      //make db call
+      var db = new DatabaseHelper();
+      var result = await db.deletePayments(temp);
+      if (result) {
+        setState(() {
+          for (MemberPaymentHistory paymentHistory in temp) {
+            this._members[0].memberPaymentDetails.remove(paymentHistory);
+            _selectedPayments.remove(paymentHistory);
+          }
+        });
+      } else {
+        _showSnackBar("Could Not Delete The Records", Colors.red);
       }
+    }
   }
 
   Future<List<MemberDetails>> getMemberDetails(Map queryMap) async {
@@ -116,35 +116,34 @@ class DeleteMemberPaymentState extends State<DeleteMemberPayment> {
           color: Colors.blue,
         ));
     var searchStudentForm = new Container(
-        child: SingleChildScrollView(
-          child: new Column(
-            children: <Widget>[
-              new Form(
-                key: formKey,
-                child: new Column(
-                  children: <Widget>[
-                    new Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: new TextFormField(
-                        keyboardType: TextInputType.number,
-                        onSaved: (val) => _phoneNumber = val,
-                        validator: validatePhoneNumber,
-                        decoration:
-                            new InputDecoration(labelText: "Phone Number"),
-                      ),
+      child: SingleChildScrollView(
+        child: new Column(
+          children: <Widget>[
+            new Form(
+              key: formKey,
+              child: new Column(
+                children: <Widget>[
+                  new Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: new TextFormField(
+                      keyboardType: TextInputType.number,
+                      onSaved: (val) => _phoneNumber = val,
+                      validator: validatePhoneNumber,
+                      decoration:
+                          new InputDecoration(labelText: "Phone Number"),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              _isLoading ? new CircularProgressIndicator() : submitBtn
-            ],
-            crossAxisAlignment: CrossAxisAlignment.center,
-          ),
+            ),
+            _isLoading ? new CircularProgressIndicator() : submitBtn
+          ],
+          crossAxisAlignment: CrossAxisAlignment.center,
         ),
-        height: 150,
-        width: 400.0,
-        decoration:
-            new BoxDecoration(color: Colors.grey.shade200.withOpacity(1)));
+      ),
+      height: 150,
+      width: 400.0,
+    );
     return new Scaffold(
         key: scaffoldKey,
         appBar:
@@ -153,12 +152,27 @@ class DeleteMemberPaymentState extends State<DeleteMemberPayment> {
           child: new Container(
             child: new Center(
               child: new ClipRect(
-                child: ListView(
-                    children: <Widget>[searchStudentForm, paymentSection()]),
+                child: ListView(children: <Widget>[
+                  searchStudentForm,
+                  memberInfoSection(),
+                  paymentSection()
+                ]),
               ),
             ),
           ),
         ));
+  }
+
+  memberInfoSection() {
+    if (this._members == null || this._members.length == 0) {
+      return new Container();
+    }
+    return Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: new Text(
+            "Below table shows payment details of ${_members[0].memberDetails.firstName} ${_members[0].memberDetails.lastName} .",
+            style: new TextStyle(
+                fontWeight: FontWeight.bold, color: Colors.black)));
   }
 
   paymentSection() {

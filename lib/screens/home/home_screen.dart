@@ -3,6 +3,7 @@ import 'package:physique_gym/models/member.dart';
 import 'package:physique_gym/screens/member/add_member.dart';
 import 'package:physique_gym/screens/member/add_payment.dart';
 import 'package:physique_gym/screens/member/delete_payment.dart';
+import 'package:physique_gym/screens/member/edit_member.dart';
 import 'package:physique_gym/screens/member/search_member.dart';
 import 'package:intl/intl.dart';
 import 'package:physique_gym/data/database_helper.dart';
@@ -15,7 +16,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomePageState extends State<HomeScreen> {
-  HomePageState() {
+  @override
+  initState() {
+    super.initState();
+    // Add listeners to this class
     _isDataLoadedFromDB = false;
   }
 
@@ -100,14 +104,14 @@ class HomePageState extends State<HomeScreen> {
                   padding: EdgeInsets.all(10),
                   shrinkWrap: true,
                   children: <Widget>[
-                    new DrawerHeader(
+                    DrawerHeader(
                       child: new Text(
                         'Member Menu',
                         style: TextStyle(
                             color: Colors.white, fontStyle: FontStyle.italic),
                       ),
                     ),
-                    new ListTile(
+                    ListTile(
                       title: new Text(
                         'Search',
                         style: TextStyle(
@@ -122,7 +126,7 @@ class HomePageState extends State<HomeScreen> {
                             ));
                       },
                     ),
-                    new ListTile(
+                    ListTile(
                       title: new Text(
                         'Add',
                         style: TextStyle(
@@ -137,22 +141,7 @@ class HomePageState extends State<HomeScreen> {
                             ));
                       },
                     ),
-                    new ListTile(
-                      title: new Text(
-                        'Edit',
-                        style: TextStyle(
-                            color: Colors.white, fontStyle: FontStyle.italic),
-                      ),
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AddMember(),
-                            ));
-                      },
-                    ),
-                    new ListTile(
+                    ListTile(
                       title: new Text(
                         'Add Payment',
                         style: TextStyle(
@@ -167,7 +156,7 @@ class HomePageState extends State<HomeScreen> {
                             ));
                       },
                     ),
-                    new ListTile(
+                    ListTile(
                       title: new Text(
                         'Delete Payment',
                         style: TextStyle(

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:ui';
 import 'package:intl/intl.dart';
 import 'package:archive/archive.dart';
+import 'package:physique_gym/screens/member/edit_member.dart';
 
 class MemberPaymentHistoryDetails extends StatefulWidget {
   final List<MemberDetails> members;
@@ -72,7 +73,7 @@ class MemberPaymentHistoryDetailsState
           scrollDirection: Axis.horizontal,
           child: Column(children: <Widget>[
             DataTable(
-              dataRowHeight: 60,
+              horizontalMargin: 10,
               columns: [
                 DataColumn(
                   label: Text("First Name"),
@@ -173,56 +174,92 @@ class MemberPaymentHistoryDetailsState
     const base64 = const Base64Codec();
     members = ModalRoute.of(context).settings.arguments;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        verticalDirection: VerticalDirection.down,
-        children: <Widget>[
-          new Padding(
-            padding: const EdgeInsets.all(2.0),
-            child: members[0].memberDetails.image != null
-                ? Image.memory(
-                    new GZipDecoder().decodeBytes(
-                        base64.decode(members[0].memberDetails.image)),
-                    height: 240,
-                    width: 200,
-                  )
-                : null,
-          ),
-          ClipRect(
-            child: dataBody(),
-          ),
-          Expanded(
-            child: paymentHistory(),
-          ),
-
-          /*Row(
-
-            mainAxisAlignment: MainAxisAlignment.center,
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: Container(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            verticalDirection: VerticalDirection.down,
             children: <Widget>[
-              Padding(
-                padding: EdgeInsets.all(20.0),
-                child: OutlineButton(
-                  child: Text('Edit member'),
-                  onPressed: () {},
-                ),
+              Expanded(
+                  child: Padding(
+                padding: EdgeInsets.all(2.0),
+                child: members[0].memberDetails.image != null
+                    ? Image.memory(
+                        new GZipDecoder().decodeBytes(
+                            base64.decode(members[0].memberDetails.image)),
+                      )
+                    : null,
+              )),
+              Expanded(
+                child: dataBody(),
               ),
-              Padding(
-                padding: EdgeInsets.all(20.0),
-                child: OutlineButton(
-                  child: Text('Add Payment'),
-                  onPressed: () {},
-                ),
+              Expanded(
+                child: paymentHistory(),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.all(2.0),
+                    child: OutlineButton(
+                      child: Text('Edit Member'),
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => new EditMember(),
+                                settings:
+                                    RouteSettings(arguments: this.members)));
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(2.0),
+                    child: OutlineButton(
+                      child: Text('Delete Member'),
+                      onPressed: () {
+                        _asyncConfirmDialog(context);
+                      },
+                    ),
+                  )
+                ],
               ),
             ],
-          ),*/
-        ],
-      ),
-    );
+          ),
+        ));
   }
+}
+
+enum ConfirmAction { CANCEL, ACCEPT }
+
+Future<ConfirmAction> _asyncConfirmDialog(BuildContext context) async {
+  return showDialog<ConfirmAction>(
+    context: context,
+    barrierDismissible: false, // user must tap button for close dialog!
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('DELETE MEMBER?'),
+        content: const Text('This will delete the member.'),
+        actions: <Widget>[
+          FlatButton(
+            child: const Text('YES'),
+            onPressed: () {
+              Navigator.of(context).pop(ConfirmAction.ACCEPT);
+            },
+          ),
+          FlatButton(
+            child: const Text('NO'),
+            onPressed: () {
+              Navigator.of(context).pop(ConfirmAction.CANCEL);
+            },
+          )
+        ],
+      );
+    },
+  );
 }

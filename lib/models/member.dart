@@ -73,7 +73,7 @@ class Member {
         _phoneNumber.toString() +
         " , " +
         "Address : " +
-        _studentAddress +
+        _studentAddress == null ? "" : _studentAddress +
         " , " +
         "Image : " +
         memberImage +
