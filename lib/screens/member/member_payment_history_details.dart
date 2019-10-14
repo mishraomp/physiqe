@@ -101,15 +101,13 @@ class MemberPaymentHistoryDetailsState
                     (member) => DataRow(
                         /*selected: selectedUsers.contains(member),
                         onSelectChanged: (b) {
-                          print("Onselect");
                           onSelectedRow(b, member);
                         },*/
                         cells: [
                           DataCell(
                             Text(member.memberDetails.firstName),
                             onTap: () {
-                              print(
-                                  'Selected ${member.memberDetails.firstName}');
+
                             },
                           ),
                           DataCell(
@@ -157,7 +155,6 @@ class MemberPaymentHistoryDetailsState
                   DataCell(
                     Text(memberPaymentDetails.paymentAmount),
                     onTap: () {
-                      print('Selected ${memberPaymentDetails.paymentAmount}');
                     },
                   )
                 ]),

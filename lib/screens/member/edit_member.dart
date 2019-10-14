@@ -62,44 +62,47 @@ class EditMemberState extends State<EditMember> {
 
   void _submit() async {
     final form = formKey.currentState;
-    const base64 = const Base64Codec();
     if (form.validate()) {
       setState(() => _isLoading = true);
       form.save();
-      var members =
-          await new DatabaseHelper().findMemberByPhoneNumber(this._phoneNumber);
-      if (members.length == 0) {
-        List<int> image =
-            _memberImage != null ? await _memberImage.readAsBytes() : [];
-        if (image.isNotEmpty) {
-          String encodedImage = base64.encode(image);
-          this._studentImage = encodedImage;
+      if (isFormUpdated()) {
+        var retrievedMembersByPhoneNumber = [];
+        if (membersOld[0].memberDetails.phoneNumber != this._phoneNumber) {
+          retrievedMembersByPhoneNumber = await new DatabaseHelper()
+              .findMemberByPhoneNumber(this._phoneNumber);
         }
-        Member member = new Member(
-            this._firstName,
-            this._lastName,
-            this._phoneNumber,
-            this._studentImage,
-            this._nextPaymentDate,
-            this._studentAddress);
-
-        var result = true;
-        //await new DatabaseHelper().addNewMember(member, paymentHistory);
-        if (result) {
-          setState(() {
-            _isLoading = false;
-            _memberImage = null;
-            formKey.currentState.reset();
-          });
-          _showSnackBar("Member added successfully.", Colors.white);
+        if (retrievedMembersByPhoneNumber.length == 0) {
+          if (this.members[0].memberDetails.image.isNotEmpty) {
+            this._studentImage = this.members[0].memberDetails.image;
+          }
+          Member member = new Member(
+              this._firstName,
+              this._lastName,
+              this._phoneNumber,
+              this._studentImage,
+              this._nextPaymentDate,
+              this._studentAddress);
+          member.id = this.members[0].memberDetails.id;
+          var result = true;
+          await new DatabaseHelper().updateMember(member);
+          if (result) {
+            setState(() {
+              _isLoading = false;
+            });
+            _showSnackBar("Member updated successfully.", Colors.white);
+          } else {
+            _showSnackBar("Member could not be updated.", Colors.red);
+            setState(() => _isLoading = false);
+          }
         } else {
-          _showSnackBar("Member could not be added.", Colors.red);
+          _showSnackBar(
+              "Phoner Number is already used by another member.${retrievedMembersByPhoneNumber[0].firstName + " " + retrievedMembersByPhoneNumber[0].lastName}",
+              Colors.red);
           setState(() => _isLoading = false);
         }
-        print(result);
       } else {
         _showSnackBar(
-            "Phoner Number is already used by another member.${members[0].firstName + " " + members[0].lastName}",
+            "No updates made, please update before clicking on update.",
             Colors.red);
         setState(() => _isLoading = false);
       }
@@ -119,15 +122,10 @@ class EditMemberState extends State<EditMember> {
   @override
   Widget build(BuildContext context) {
     members = ModalRoute.of(context).settings.arguments;
-    membersOld =  ModalRoute.of(context).settings.arguments; // assign it here for comparison during submit, if no updates to any field stop form submission.
+    membersOld = ModalRoute.of(context)
+        .settings
+        .arguments; // assign it here for comparison during submit, if no updates to any field stop form submission.
     // Obtain a list of the available cameras on the device.
-    String validatePaymentAmount(val) {
-      if (val.length < 1) {
-        return "Payment Amount can not be blank.";
-      } else {
-        return null;
-      }
-    }
 
     String validatePhoneNumber(val) {
       if (val.length < 1) {
@@ -288,5 +286,29 @@ class EditMemberState extends State<EditMember> {
             ),
           ),
         ));
+  }
+
+  bool isFormUpdated() {
+    final Member member = this.members[0].memberDetails;
+    final Member memberOld = this.membersOld[0].memberDetails;
+    if (member.nextPaymentDate != memberOld.nextPaymentDate) {
+      return true;
+    }
+    if (this._firstName != memberOld.firstName) {
+      return true;
+    }
+    if (this._lastName != memberOld.lastName) {
+      return true;
+    }
+    if (this._phoneNumber != memberOld.phoneNumber) {
+      return true;
+    }
+    if (member.image != memberOld.image) {
+      return true;
+    }
+    if (this._studentAddress != memberOld.address) {
+      return true;
+    }
+    return false;
   }
 }

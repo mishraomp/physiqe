@@ -95,7 +95,6 @@ class DatabaseHelper {
       List<Map> results = await dbClient
           .rawQuery("SELECT * FROM user where username ='" + userName + "'");
       User user = User.map(results.first);
-      print(results);
       return user;
     } catch (error) {
       print(error);
@@ -119,7 +118,6 @@ class DatabaseHelper {
       return false;
     }
   }
-
   Future<bool> addPaymentToExistingMember(
       final Member member, final MemberPaymentHistory paymentHistory) async {
     try {
@@ -151,6 +149,7 @@ class DatabaseHelper {
       });
       return true;
     } catch (error) {
+      print(error);
       return false;
     }
   }

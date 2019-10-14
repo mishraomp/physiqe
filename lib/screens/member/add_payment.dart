@@ -51,7 +51,6 @@ class AddPaymentState extends State<AddPayment> {
           _showSnackBar("Payment Details could not be added.", Colors.red);
           setState(() => _isLoading = false);
         }
-        print(result);
       }
     }
   }
