@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:intl/intl.dart';
 import 'package:archive/archive.dart';
 import 'package:physique_gym/screens/member/edit_member.dart';
+import 'package:physique_gym/data/database_helper.dart';
 
 class MemberPaymentHistoryDetails extends StatefulWidget {
   final List<MemberDetails> members;
@@ -21,6 +22,7 @@ class MemberPaymentHistoryDetails extends StatefulWidget {
 
 class MemberPaymentHistoryDetailsState
     extends State<MemberPaymentHistoryDetails> {
+  final scaffoldKey = new GlobalKey<ScaffoldState>();
   double height;
   List<MemberDetails> members;
   List<MemberDetails> selectedUsers;
@@ -106,9 +108,7 @@ class MemberPaymentHistoryDetailsState
                         cells: [
                           DataCell(
                             Text(member.memberDetails.firstName),
-                            onTap: () {
-
-                            },
+                            onTap: () {},
                           ),
                           DataCell(
                             Text(member.memberDetails.lastName),
@@ -154,8 +154,7 @@ class MemberPaymentHistoryDetailsState
                       .toString())),
                   DataCell(
                     Text(memberPaymentDetails.paymentAmount),
-                    onTap: () {
-                    },
+                    onTap: () {},
                   )
                 ]),
               )
@@ -171,6 +170,7 @@ class MemberPaymentHistoryDetailsState
     const base64 = const Base64Codec();
     members = ModalRoute.of(context).settings.arguments;
     return Scaffold(
+        key: scaffoldKey,
         appBar: AppBar(
           title: Text(widget.title),
         ),
@@ -230,33 +230,54 @@ class MemberPaymentHistoryDetailsState
           ),
         ));
   }
+
+  void _showSnackBar(String text, Color color) {
+    scaffoldKey.currentState.showSnackBar(SnackBar(
+      content: Text(
+        text,
+        style: TextStyle(color: color),
+      ),
+      duration: Duration(seconds: 3),
+    ));
+  }
+
+  Future<ConfirmAction> _asyncConfirmDialog(BuildContext context) async {
+    return showDialog<ConfirmAction>(
+      context: context,
+      barrierDismissible: false, // user must tap button for close dialog!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('DELETE MEMBER?'),
+          content: const Text('This will delete the member.'),
+          actions: <Widget>[
+            FlatButton(
+              child: const Text('YES'),
+              onPressed: () async {
+                Navigator.of(context).pop(ConfirmAction.ACCEPT);
+                var result = await new DatabaseHelper().deleteMemberDetails(
+                    this.members[0].memberDetails.phoneNumber);
+                if (result) {
+                  _showSnackBar("Member deleted.", Colors.red);
+                } else {
+                  _showSnackBar("Member could not be deleted.", Colors.red);
+                }
+                Future.delayed(const Duration(milliseconds: 1000), () {
+// Here you can write your code
+                  Navigator.of(context).popUntil(ModalRoute.withName('/home'));
+                });
+              },
+            ),
+            FlatButton(
+              child: const Text('NO'),
+              onPressed: () {
+                Navigator.of(context).pop(ConfirmAction.CANCEL);
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
 }
 
 enum ConfirmAction { CANCEL, ACCEPT }
-
-Future<ConfirmAction> _asyncConfirmDialog(BuildContext context) async {
-  return showDialog<ConfirmAction>(
-    context: context,
-    barrierDismissible: false, // user must tap button for close dialog!
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('DELETE MEMBER?'),
-        content: const Text('This will delete the member.'),
-        actions: <Widget>[
-          FlatButton(
-            child: const Text('YES'),
-            onPressed: () {
-              Navigator.of(context).pop(ConfirmAction.ACCEPT);
-            },
-          ),
-          FlatButton(
-            child: const Text('NO'),
-            onPressed: () {
-              Navigator.of(context).pop(ConfirmAction.CANCEL);
-            },
-          )
-        ],
-      );
-    },
-  );
-}

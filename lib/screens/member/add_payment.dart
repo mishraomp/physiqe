@@ -38,7 +38,7 @@ class AddPaymentState extends State<AddPayment> {
         Member member = members[0];
         member.nextPaymentDate = _nextPaymentDate;
         MemberPaymentHistory paymentHistory =
-            new MemberPaymentHistory(this._paymentDate, this._paymentAmount);
+            new MemberPaymentHistory.withArguments(this._paymentDate, this._paymentAmount);
         var result =
             await new DatabaseHelper().addPaymentToExistingMember(member, paymentHistory);
         if (result) {

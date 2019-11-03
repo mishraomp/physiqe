@@ -30,23 +30,45 @@ class MemberDetails {
     String memberImage = _member.image == null ? "" : _member.image;
     String nextPaymentDate =
         _member.nextPaymentDate == null ? "" : _member.nextPaymentDate;
-    String memberString = "First Name : " +
-        _member.firstName +
-        " , " +
-        "Last Name : " +
-        _member.lastName +
-        " , " +
-        " , " +
-        "Phoner Number : " +
-        _member.phoneNumber.toString() +
-        "Address : " +
-        _member.address +
-        " , " +
-        "Image : " +
-        memberImage +
-        " , " +
-        "Next Payment Date : " +
-        nextPaymentDate;
-    return memberString;
+    StringBuffer memberString = new StringBuffer();
+    memberString.write("First Name : ");
+    memberString.write(_member.firstName);
+    memberString.write(" , ");
+    memberString.write("Last Name : ");
+    memberString.write(_member.lastName);
+    memberString.write(" , ");
+    memberString.write("Phoner Number : ");
+    memberString.write(_member.phoneNumber.toString());
+    memberString.write("Address : ");
+    memberString.write(_member.address);
+    memberString.write(" , ");
+    memberString.write("ID : ");
+    memberString.write(_member.id.toString());
+    memberString.write(" , ");
+    memberString.write("Next Payment Date : ");
+    memberString.write(nextPaymentDate);
+    memberString.write(" :::::: Payment Details :::::: \n ");
+    if (_memberPaymentHistoryList.length > 0) {
+      int index = 1;
+      for (MemberPaymentHistory paymentHistory in _memberPaymentHistoryList) {
+        memberString.write("Payment ID :: " +
+            index.toString() +
+            " :: " +
+            paymentHistory.paymentId.toString());
+        memberString
+            .write("Member ID :: " + paymentHistory.memberId.toString());
+        memberString.write("Payment Date :: " +
+            index.toString() +
+            " :: " +
+            paymentHistory.paymentDate);
+        memberString.write("Payment Amount :: " +
+            index.toString() +
+            " :: " +
+            paymentHistory.paymentAmount);
+        index++;
+      }
+      memberString.write("\n");
+    }
+    return memberString.toString();
   }
 }

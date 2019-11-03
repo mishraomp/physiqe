@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:physique_gym/routes.dart';
-import 'package:physique_gym/data/database_helper.dart';
-import 'models/user.dart';
 
 void main() => runApp(new PhysiqueGymApp());
 
@@ -17,7 +15,6 @@ class PhysiqueGymApp extends StatelessWidget {
       print(DateTime.now());
     });
     imageCache.clear();
-    saveUser();
     return new MaterialApp(
       title: 'Physique Gym',
       theme: new ThemeData(
@@ -25,12 +22,5 @@ class PhysiqueGymApp extends StatelessWidget {
       ),
       routes: routes,
     );
-  }
-
-  void saveUser() async {
-    var db = new DatabaseHelper();
-    //await db.deleteUsers();
-    User user = new User('kc', 'kc123#');
-    await db.saveUser(user);
   }
 }

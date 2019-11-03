@@ -2,7 +2,9 @@ class MemberPaymentHistory {
   String _paymentAmount, _paymentDate;
   int _id, _paymentId;
 
-  MemberPaymentHistory(this._paymentDate, this._paymentAmount);
+  MemberPaymentHistory.withArguments(this._paymentDate, this._paymentAmount);
+
+  MemberPaymentHistory();
 
   MemberPaymentHistory.map(dynamic obj) {
     this._paymentDate = obj["paymentDate"];
@@ -15,11 +17,16 @@ class MemberPaymentHistory {
 
   set paymentId(int paymentId) => this._paymentId = paymentId;
 
+  set paymentAmount(String paymentAmount) =>
+      this._paymentAmount = paymentAmount;
+
   int get paymentId => _paymentId;
 
   int get memberId => _id;
 
   String get paymentAmount => _paymentAmount;
+
+  set paymentDate(String paymentDate) => this._paymentDate = paymentDate;
 
   String get paymentDate => _paymentDate;
 

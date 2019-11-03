@@ -70,17 +70,22 @@ class DatabaseHelper {
     return 0;
   }
 
-  Future<int> deleteMemberDetails(int phoneNumber) async {
+  Future<bool> deleteMemberDetails(int phoneNumber) async {
     var dbClient = await db;
-    var memberDetails = await findMemberByPhoneNumber(phoneNumber);
-    await dbClient.transaction((txn) async {
-      await txn.delete(ApplicationConstants.TABLE_MEMBER_PAYMENT_INFO,
-          where: "memberId = ?", whereArgs: [memberDetails[0].id]);
-      await txn.delete(ApplicationConstants.TABLE_MEMBER,
-          where: "id = ?", whereArgs: [memberDetails[0].id]);
-    });
+    try {
+      var memberDetails = await findMemberByPhoneNumber(phoneNumber);
+      await dbClient.transaction((txn) async {
+        await txn.delete(ApplicationConstants.TABLE_MEMBER_PAYMENT_INFO,
+            where: "memberId = ?", whereArgs: [memberDetails[0].id]);
+        await txn.delete(ApplicationConstants.TABLE_MEMBER,
+            where: "id = ?", whereArgs: [memberDetails[0].id]);
+      });
+    } catch (error) {
+      print(error);
+      return false;
+    }
 
-    return 1;
+    return true;
   }
 
   Future<bool> isLoggedIn() async {
@@ -118,6 +123,7 @@ class DatabaseHelper {
       return false;
     }
   }
+
   Future<bool> addPaymentToExistingMember(
       final Member member, final MemberPaymentHistory paymentHistory) async {
     try {
@@ -190,7 +196,7 @@ class DatabaseHelper {
       int memberId, DateTime paymentDate, int paymentAmount) async {
     try {
       var dbClient = await db;
-      final MemberPaymentHistory paymentHistory = new MemberPaymentHistory(
+      final MemberPaymentHistory paymentHistory = new MemberPaymentHistory.withArguments(
           paymentDate.toString(), paymentAmount.toString());
       paymentHistory.memberId = memberId;
       await dbClient.transaction((txn) async {
@@ -264,12 +270,34 @@ class DatabaseHelper {
       "firstName",
       "lastName",
       "phoneNumber",
-      "nextPaymentDate"
+      "nextPaymentDate",
+      "image"
     ]);
     for (Map item in results) {
       members.add(Member.map(item));
     }
     return members;
+  }
+
+  Future<List<List<dynamic>>> getAllMembers() async {
+    var rows = List<List<dynamic>>();
+    var dbClient = await db;
+    List<Map<String, dynamic>> results =
+        await dbClient.query(ApplicationConstants.TABLE_MEMBER);
+    for (Map item in results) {
+      List<dynamic> row = List();
+      String paymentHistory =await getPaymentHistoryAsString(item);
+      row.add(item["firstName"]);
+      row.add(item["lastName"]);
+      row.add(item["phoneNumber"]);
+      row.add(item["image"]);
+      row.add(item["nextPaymentDate"]);
+      row.add(item["address"]);
+      row.add(item["id"]);
+      row.add(paymentHistory);
+      rows.add(row);
+    }
+    return rows;
   }
 
   ///it will return all the members who has the Payment to be made as of Today
@@ -301,4 +329,50 @@ class DatabaseHelper {
     }
     return filteredMembers;
   }
+
+  Future<String> getPaymentHistoryAsString(Map item) async{
+    StringBuffer paymentHistoryBuffer = new StringBuffer();
+    var dbClient = await db;
+    Member member = Member.map(item);
+    List<Map<String, dynamic>> memberPaymentDetails =
+        await dbClient.rawQuery("SELECT * FROM " +
+        ApplicationConstants.TABLE_MEMBER_PAYMENT_INFO +
+        " where memberId=" +
+        member.id.toString());
+    int index = 0;
+    for (Map memberPaymentDetail in memberPaymentDetails) {
+      MemberPaymentHistory paymentHistory =
+      MemberPaymentHistory.map(memberPaymentDetail);
+      paymentHistoryBuffer.write(paymentHistory.paymentId);
+      paymentHistoryBuffer.write("::");
+      paymentHistoryBuffer.write(paymentHistory.memberId);
+      paymentHistoryBuffer.write("::");
+      paymentHistoryBuffer.write(paymentHistory.paymentAmount);
+      paymentHistoryBuffer.write("::");
+      paymentHistoryBuffer.write(paymentHistory.paymentDate);
+      if(++index < memberPaymentDetails.length){
+        paymentHistoryBuffer.write(",");
+      }
+    }
+    return paymentHistoryBuffer.toString();
+  }
+  Future<bool> addAllMemberDetails(List<MemberDetails> memberDetails) async{
+    try {
+      var dbClient = await db;
+      for(MemberDetails memberDetail in memberDetails){
+        await dbClient.transaction((txn) async {
+          await txn.insert(ApplicationConstants.TABLE_MEMBER, memberDetail.memberDetails.toMap());
+          for(MemberPaymentHistory paymentHistory in memberDetail.memberPaymentDetails){
+            await txn.insert(ApplicationConstants.TABLE_MEMBER_PAYMENT_INFO,
+                paymentHistory.toMap());
+          }
+
+        });
+      }
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
 }

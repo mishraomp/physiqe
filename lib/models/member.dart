@@ -6,8 +6,9 @@ class Member {
       _nextPaymentDate;
   int _id, _phoneNumber;
 
-  Member(this._firstName, this._lastName, this._phoneNumber, this._studentImage,
+  Member.memberWithArguments(this._firstName, this._lastName, this._phoneNumber, this._studentImage,
       this._nextPaymentDate, this._studentAddress);
+  Member();
 
   set id(int id) => this._id = id;
 

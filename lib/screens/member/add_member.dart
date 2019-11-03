@@ -73,7 +73,7 @@ class AddMemberState extends State<AddMember> {
 
           this._studentImage = encodedImage;
         }
-        Member member = new Member(
+        Member member = new Member.memberWithArguments(
             this._firstName,
             this._lastName,
             this._phoneNumber,
@@ -81,7 +81,7 @@ class AddMemberState extends State<AddMember> {
             this._nextPaymentDate,
             this._studentAddress);
         MemberPaymentHistory paymentHistory =
-            new MemberPaymentHistory(this._paymentDate, this._paymentAmount);
+            new MemberPaymentHistory.withArguments(this._paymentDate, this._paymentAmount);
         var result =
             await new DatabaseHelper().addNewMember(member, paymentHistory);
         if (result) {

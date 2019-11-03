@@ -72,10 +72,10 @@ class EditMemberState extends State<EditMember> {
               .findMemberByPhoneNumber(this._phoneNumber);
         }
         if (retrievedMembersByPhoneNumber.length == 0) {
-          if (this.members[0].memberDetails.image.isNotEmpty) {
+          if (this.members[0].memberDetails.image != null) {
             this._studentImage = this.members[0].memberDetails.image;
           }
-          Member member = new Member(
+          Member member = new Member.memberWithArguments(
               this._firstName,
               this._lastName,
               this._phoneNumber,
@@ -143,7 +143,7 @@ class EditMemberState extends State<EditMember> {
     var nextPaymentDatePicker = DateTimeField(
       readOnly: true,
       format: new DateFormat.yMMMMd("en_US"),
-      initialValue: DateTime.now().add(Duration(days: 30)),
+      initialValue: DateTime.parse(this.members[0].memberDetails.nextPaymentDate),
       onShowPicker: (context, currentVal) {
         return showDatePicker(
             context: context,
@@ -291,7 +291,11 @@ class EditMemberState extends State<EditMember> {
   bool isFormUpdated() {
     final Member member = this.members[0].memberDetails;
     final Member memberOld = this.membersOld[0].memberDetails;
-    if (member.nextPaymentDate != memberOld.nextPaymentDate) {
+    var nextPayDate = DateTime.parse(this._nextPaymentDate);
+    var nextPayDateOld = DateTime.parse(memberOld.nextPaymentDate);
+    if (nextPayDate.day != nextPayDateOld.day ||
+        nextPayDate.month != nextPayDateOld.month ||
+        nextPayDate.year != nextPayDateOld.year) {
       return true;
     }
     if (this._firstName != memberOld.firstName) {
